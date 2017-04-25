@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"log"
 	"strings"
@@ -25,12 +24,6 @@ type Game struct {
 	pointsTeam1 int
 	pointsTeam2 int
 	liveTransmission string
-
-}
-
-func main() {
-
-	fmt.Println(len(GetFixtures()))
 
 }
 
