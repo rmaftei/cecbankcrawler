@@ -1,4 +1,4 @@
-package main
+package ligacecbank
 
 import (
 	"github.com/PuerkitoBio/goquery"
