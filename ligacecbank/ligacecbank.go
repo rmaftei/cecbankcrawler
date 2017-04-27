@@ -13,17 +13,17 @@ const SELECTOR = "[style^=\"padding:2px;border-bottom:1px solid #ccc;vertical-al
 const STAGE_SIZE = 3
 
 type Stage struct {
-	games []Game
+	Games []Game
 }
 
 type Game struct {
-	startTime time.Time
-	location string
-	team1 string
-	team2 string
-	pointsTeam1 int
-	pointsTeam2 int
-	liveTransmission string
+	StartTime time.Time
+	Location string
+	Team1 string
+	Team2 string
+	PointsTeam1 int
+	PointsTeam2 int
+	LiveTransmission string
 
 }
 
