@@ -41,6 +41,8 @@ func GetFixtures() []Stage {
 
 		if len(currentStage) % STAGE_SIZE == 0 {
 			stages = append(stages, Stage{currentStage})
+
+			currentStage = nil
 		}
 
 	}
