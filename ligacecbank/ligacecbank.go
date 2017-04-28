@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 	"strconv"
+	"io"
+	"net/http"
 )
 
 const RESOURCE_URL = "https://www.super-liga.ro/superliga/program-rezultate/"
@@ -27,10 +29,31 @@ type Game struct {
 
 }
 
-func GetFixtures() []Stage {
+type Fixtures interface {
+	GetFixtures() []Stage
+}
+
+type LigaCECBankFixtures struct {
+	dataStream io.Reader
+}
+
+func (f LigaCECBankFixtures) GetFixtures() []Stage {
 	var stages = make([]Stage, 0)
 
-	result := getDataFromWeb(RESOURCE_URL, SELECTOR)
+	if nil == f.dataStream {
+		data, err := http.Get(RESOURCE_URL)
+
+		if nil != err {
+			log.Fatalf("Cannot read from %s", RESOURCE_URL)
+
+			return stages
+		}
+
+		f.dataStream = data.Body
+	}
+
+
+	result := getDataFromWeb(f.dataStream, SELECTOR)
 
 	currentStage := make([]Game, 0)
 
@@ -50,11 +73,11 @@ func GetFixtures() []Stage {
 	return stages
 }
 
-func getDataFromWeb(url string, selector string ) []string {
+func getDataFromWeb(io io.Reader, selector string) []string {
 
 	var result = make([]string, 0)
 
-	doc, err := goquery.NewDocument(url)
+	doc, err := goquery.NewDocumentFromReader(io)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,7 +86,7 @@ func getDataFromWeb(url string, selector string ) []string {
 		text := strings.Replace(s.Text(), "\n", "", -1)
 		text = strings.Replace(text, "\t", "", -1)
 
-		if len(text) > 0 {
+		if isNotBlank(text) {
 			result = append(result, text)
 		}
 
@@ -71,6 +94,25 @@ func getDataFromWeb(url string, selector string ) []string {
 
 	return result
 }
+
+func isNotBlank(str string) bool {
+	return !isBlank(str)
+}
+
+func isBlank(str string) bool {
+	if len(str) <= 0 {
+		return true
+	}
+
+	for _, c := range str {
+		if ' ' != c {
+			return false
+		}
+	}
+
+	return true
+}
+
 
 func dataToGame(data []string) Game {
 	dateTime := strings.Split(data[0], "ora")
