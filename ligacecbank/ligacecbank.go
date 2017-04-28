@@ -8,36 +8,43 @@ import (
 	"strconv"
 	"io"
 	"net/http"
+	"errors"
 )
 
 const RESOURCE_URL = "https://www.super-liga.ro/superliga/program-rezultate/"
 const SELECTOR = "[style^=\"padding:2px;border-bottom:1px solid #ccc;vertical-align:middle;\"]"
 const STAGE_SIZE = 3
 
-type Stage struct {
-	Games []Game
-}
 
-type Game struct {
-	StartTime time.Time
-	Location string
-	Team1 string
-	Team2 string
-	PointsTeam1 int
-	PointsTeam2 int
-	LiveTransmission string
-
-}
-
-type Fixtures interface {
-	GetFixtures() []Stage
-}
-
-type LigaCECBankFixtures struct {
+type Repository struct {
 	dataStream io.Reader
 }
 
-func (f LigaCECBankFixtures) GetFixtures() []Stage {
+func WithDefaultDataStream() (Repository, error) {
+	data, err := http.Get(RESOURCE_URL)
+
+	if nil != err {
+		log.Fatalf("Cannot read from %s", RESOURCE_URL)
+		return Repository{}, errors.New("Could not create datastream")
+	}
+
+	return Repository{
+		dataStream: data.Body,
+	}, nil
+}
+
+func WithDataStream(reader io.Reader) (Repository, error) {
+	if nil == reader {
+		log.Fatal("Cannot read input stream")
+		return Repository{}, errors.New("Could not create datastream")
+	}
+
+	return Repository{
+		dataStream: reader,
+	}, nil
+}
+
+func (f Repository) GetFixtures() []Stage {
 	var stages = make([]Stage, 0)
 
 	if nil == f.dataStream {
@@ -94,25 +101,6 @@ func getDataFromWeb(io io.Reader, selector string) []string {
 
 	return result
 }
-
-func isNotBlank(str string) bool {
-	return !isBlank(str)
-}
-
-func isBlank(str string) bool {
-	if len(str) <= 0 {
-		return true
-	}
-
-	for _, c := range str {
-		if ' ' != c {
-			return false
-		}
-	}
-
-	return true
-}
-
 
 func dataToGame(data []string) Game {
 	dateTime := strings.Split(data[0], "ora")

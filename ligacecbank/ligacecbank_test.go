@@ -19,8 +19,10 @@ func TestGetFixtures(t *testing.T) {
 
 	defer file.Close()
 
-	repository:= LigaCECBankFixtures{
-		dataStream: file,
+	repository, err := WithDataStream(file)
+
+	if nil != err {
+		t.Fatalf("Could not create repository")
 	}
 
 	fixtures := repository.GetFixtures()
