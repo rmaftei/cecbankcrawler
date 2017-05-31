@@ -9,7 +9,7 @@ const FILE_PATH string = "resources/ligacecbank.html"
 type FaceFixture struct {}
 
 func TestGetFixtures(t *testing.T) {
-	expectedSize := 14
+	expectedSize := 17
 
 	file, err := os.Open(FILE_PATH)
 

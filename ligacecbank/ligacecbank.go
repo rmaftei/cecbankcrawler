@@ -9,12 +9,15 @@ import (
 	"io"
 	"net/http"
 	"errors"
+	"regexp"
 )
 
-const RESOURCE_URL = "https://www.super-liga.ro/superliga/program-rezultate/"
-const SELECTOR = "[style^=\"padding:2px;border-bottom:1px solid #ccc;vertical-align:middle;\"]"
-const STAGE_SIZE = 3
-
+const (
+	RESOURCE_URL = "https://www.super-liga.ro/superliga/program-rezultate/"
+	SELECTOR = "[style^=\"padding:2px;border-bottom:1px solid #ccc;vertical-align:middle;\"]"
+	STAGE_SIZE = 3
+	DATA_SIZE = 5
+)
 
 type Repository struct {
 	dataStream io.Reader
@@ -64,8 +67,8 @@ func (f Repository) GetFixtures() []Stage {
 
 	currentStage := make([]Game, 0)
 
-	for i := 0; i < len(result); i+=6 {
-		data := result[i: i + 6]
+	for i := 0; i < len(result); i+= DATA_SIZE {
+		data := result[i: i + DATA_SIZE]
 
 		currentStage = append(currentStage, dataToGame(data))
 
@@ -93,7 +96,7 @@ func getDataFromWeb(io io.Reader, selector string) []string {
 		text := strings.Replace(s.Text(), "\n", "", -1)
 		text = strings.Replace(text, "\t", "", -1)
 
-		if isNotBlank(text) {
+		if isNotBlank(text) && isNotNumber(text) {
 			result = append(result, text)
 		}
 
@@ -103,6 +106,9 @@ func getDataFromWeb(io io.Reader, selector string) []string {
 }
 
 func dataToGame(data []string) Game {
+
+	regex, _ := regexp.Compile("[^0-9]+")
+
 	dateTime := strings.Split(data[0], "ora")
 
 	date := strings.Split(dateTime[0], ".")
@@ -116,10 +122,10 @@ func dataToGame(data []string) Game {
 
 	dateObject := time.Date(year, time.Month(month), day, hour, minute, 0, 0, time.UTC)
 
-	teams := strings.Split(data[3], " - ")
-	score := strings.Split(data[4], "-")
-	scoreTeam1, _ := strconv.Atoi(score[0])
-	scoreTeam2, _ := strconv.Atoi(score[1])
+	teams := strings.Split(data[2], " - ")
+	score := strings.Split(data[3], "-")
+	scoreTeam1, _ := strconv.Atoi(regex.ReplaceAllString(score[0], ""))
+	scoreTeam2, _ := strconv.Atoi(regex.ReplaceAllString(score[1], ""))
 
 	return Game{
 		dateObject,
@@ -128,6 +134,6 @@ func dataToGame(data []string) Game {
 		teams[1],
 		scoreTeam1,
 		scoreTeam2,
-		data[5]}
+		data[4]}
 
 }

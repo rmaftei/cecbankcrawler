@@ -1,6 +1,20 @@
 package ligacecbank
 
+import (
+	"strconv"
+)
 
+func isNotNumber(str string) bool {
+	return !isNumber(str)
+}
+
+func isNumber(str string) bool {
+	if _, err := strconv.Atoi(str); err == nil {
+		return true
+	}
+
+	return false
+}
 
 func isNotBlank(str string) bool {
 	return !isBlank(str)
