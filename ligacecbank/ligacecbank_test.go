@@ -3,6 +3,8 @@ package ligacecbank
 import (
 	"testing"
 	"os"
+	"fmt"
+	"sort"
 )
 
 const FILE_PATH string = "resources/ligacecbank.html"
@@ -26,6 +28,10 @@ func TestGetFixtures(t *testing.T) {
 	}
 
 	fixtures := repository.GetFixtures()
+
+	sort.Sort(SortByDate(fixtures))
+
+	fmt.Println(fixtures)
 
 	if expectedSize != len(fixtures) {
 		t.Fatalf("Excepted %d and got %d", expectedSize, len(fixtures))

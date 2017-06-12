@@ -66,14 +66,16 @@ func (f Repository) GetFixtures() []Stage {
 	result := getDataFromWeb(f.dataStream, SELECTOR)
 
 	currentStage := make([]Game, 0)
-
+	stageNumber := 0
 	for i := 0; i < len(result); i+= DATA_SIZE {
 		data := result[i: i + DATA_SIZE]
 
 		currentStage = append(currentStage, dataToGame(data))
 
 		if len(currentStage) % STAGE_SIZE == 0 {
-			stages = append(stages, Stage{currentStage})
+			stages = append(stages, Stage{stageNumber,currentStage})
+
+			stageNumber = stageNumber + 1
 
 			currentStage = nil
 		}

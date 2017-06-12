@@ -3,6 +3,7 @@ package ligacecbank
 import "time"
 
 type Stage struct {
+	stageNumber int
 	Games []Game
 }
 
@@ -21,3 +22,16 @@ type Fixtures interface {
 	GetFixtures() []Stage
 }
 
+type ReverseStages []Stage
+
+func (stages ReverseStages) Len() int {
+	return len(stages)
+}
+
+func (stages ReverseStages) Swap(i, j int)      {
+	stages[i], stages[j] = stages[j], stages[i]
+}
+
+func (stages ReverseStages) Less(i int, j int) bool {
+	return stages[i].stageNumber > stages[j].stageNumber
+}
